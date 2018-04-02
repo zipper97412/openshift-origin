@@ -340,9 +340,9 @@
 		"infraLbHttpProbeId": "[concat(variables('infraLbId'),'/probes/httpProbe')]",
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
 		"imageReference": {
-			"publisher": "Openlogic",
-			"offer": "CentOS",
-			"sku": "7.4",
+			"publisher": "OpenLogic",
+			"offer": "CentOS-LVM",
+			"sku": "7-LVM",
 			"version": "latest"
 		},
 		"redHatTags": {

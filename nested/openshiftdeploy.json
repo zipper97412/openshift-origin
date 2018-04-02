@@ -28,70 +28,60 @@
 		},
 		"newStorageAccountRegistry": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Storage Account for Docker Registry"
 			}
 		},
 		"newStorageAccountKey": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Storage Account Key for Docker Registry"
 			}
 		},
 		"openshiftMasterHostname": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "OpenShift Master hostname"
 			}
 		},
 		"openshiftMasterPublicIpFqdn": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "OpenShift Master VM public IP fully qualified domain name"
 			}
 		},
 		"openshiftMasterPublicIpAddress": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "OpenShift Master VM public IP address"
 			}
 		},
 		"openshiftInfraHostname": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "OpenShift Infra Node hostname"
 			}
 		},
 		"openshiftNodeHostname": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "OpenShift Node hostname"
 			}
 		},
 		"masterInstanceCount": {
 			"type": "int",
-			"minValue": 1,
 			"metadata": {
 				"description": "Number of OpenShift Master nodes"
 			}
 		},
 		"infraInstanceCount": {
 			"type": "int",
-			"minValue": 1,
 			"metadata": {
 				"description": "Number of OpenShift Infra nodes"
 			}
 		},
 		"nodeInstanceCount": {
 			"type": "int",
-			"minValue": 1,
 			"metadata": {
 				"description": "Number of OpenShift nodes"
 			}
@@ -104,14 +94,12 @@
 		},
 		"adminUsername": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Administrator username on all VMs"
 			}
 		},
 		"openshiftPassword": {
 			"type": "securestring",
-			"minLength": 1,
 			"metadata": {
 				"description": "Administrator password for OpenShift Console"
 			}
@@ -136,14 +124,12 @@
 		},
 		"aadClientId": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Azure AD Client ID"
 			}
 		},
 		"aadClientSecret": {
 			"type": "securestring",
-			"minLength": 1,
 			"metadata": {
 				"description": "Azure AD Client Secret"
 			}
@@ -174,7 +160,6 @@
 		},
 		"sshPrivateKey": {
 			"type": "securestring",
-			"minLength": 1,
 			"metadata": {
 				"description": "SSH private key for deploying OpenShift"
 			}

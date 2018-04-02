@@ -26,13 +26,8 @@ export RESOURCEGROUP=${19}
 export LOCATION=${20}
 export METRICS=${21}
 export LOGGING=${22}
-export COCKPIT=${23}
-export AZURE=${24}
-export STORAGEKIND=${25}
-
-# Determine if Commercial Azure or Azure Government
-CLOUD=$( curl -H Metadata:true "http://169.254.169.254/metadata/instance/compute/location?api-version=2017-04-02&format=text" | cut -c 1-2 )
-export CLOUD=${CLOUD^^}
+export AZURE=${23}
+export STORAGEKIND=${24}
 
 export MASTERLOOP=$((MASTERCOUNT - 1))
 export INFRALOOP=$((INFRACOUNT - 1))
@@ -56,6 +51,7 @@ cat > updateansiblecfg.yaml <<EOF
 #!/usr/bin/ansible-playbook
 
 - hosts: localhost
+  become: yes
   gather_facts: no
   tasks:
   - lineinfile:
@@ -104,21 +100,6 @@ cat > /home/${SUDOUSER}/assignclusteradminrights.yml <<EOF
   tasks:
   - name: make OpenShift user cluster admin
     shell: "oadm policy add-cluster-role-to-user cluster-admin {{ lookup('env','SUDOUSER') }} --config=/etc/origin/master/admin.kubeconfig"
-EOF
-
-# Run on all nodes - Set Root password on all nodes
-
-cat > /home/${SUDOUSER}/assignrootpassword.yml <<EOF
----
-- hosts: nodes
-  gather_facts: no
-  become: yes
-  become_method: sudo
-  vars:
-    description: "Set password for Cockpit"
-  tasks:
-  - name: configure Cockpit password
-    shell: echo \"{{ lookup('env','PASSWORD') }}\"|passwd root --stdin
 EOF
 
 # Run on MASTER-0 node - configure registry to use Azure Storage
@@ -430,8 +411,9 @@ openshift_master_default_subdomain=$ROUTING
 openshift_override_hostname_check=true
 osm_use_cockpit=false
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
-#console_port=443
-openshift_cloudprovider_kind=azure
+openshift_master_api_port=443
+openshift_master_console_port=443
+#openshift_cloudprovider_kind=azure
 osm_default_node_selector='type=app'
 openshift_disable_check=disk_availability,memory_availability
 # default selectors for router and registry services
@@ -447,11 +429,12 @@ openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 # Enable service catalog
-openshift_enable_service_catalog=false
+# openshift_enable_service_catalog=false
 # Enable template service broker (requires service catalog to be enabled, above)
-template_service_broker_install=false
+# template_service_broker_install=false
 # Configure one of more namespaces whose templates will be served by the TSB
 openshift_template_service_broker_namespaces=['openshift']
+template_service_broker_selector={"type":"infra"}
 # Disable the OpenShift SDN plugin
 openshift_use_openshift_sdn=true
 
@@ -474,7 +457,7 @@ openshift_logging_es_nodeselector={"type":"infra"}
 openshift_logging_kibana_nodeselector={"type":"infra"}
 openshift_logging_curator_nodeselector={"type":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
-openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:8443
+openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:443
 
 # host group for masters
 [masters]
@@ -534,9 +517,9 @@ echo $(date) " - Setting up NetworkManager on eth0"
 # Configure resolv.conf on all hosts through NetworkManager
 
 runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
-sleep 5
-runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
+# sleep 5
+# runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
+# runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
@@ -562,19 +545,10 @@ echo $(date) "- Assigning cluster admin rights to user"
 
 runuser $SUDOUSER -c "ansible-playbook ~/assignclusteradminrights.yml"
 
-if [[ $COCKPIT == "true" ]]
-then
-
-# Setting password for root if Cockpit is enabled
-echo $(date) "- Assigning password for root, which is used to login to Cockpit"
-
-runuser $SUDOUSER -c "ansible-playbook ~/assignrootpassword.yml"
-fi
-
 # Configure Docker Registry to use Azure Storage Account
-echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
+# echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
 
-runuser $SUDOUSER -c "ansible-playbook ~/dockerregistry.yml"
+# runuser $SUDOUSER -c "ansible-playbook ~/dockerregistry.yml"
 
 if [[ $AZURE == "true" ]]
 then
@@ -644,7 +618,8 @@ then
 	
 	echo $(date) "- Sleep for 20"
 	
-	sleep 20	
+	sleep 20
+	runuser -l $SUDOUSER -c  "oc label nodes $MASTER-0 openshift-infra=apiserver --overwrite=true"
 	runuser -l $SUDOUSER -c  "oc label nodes --all logging-infra-fluentd=true logging=true"
 
 	runuser -l $SUDOUSER -c  "ansible all -b  -m service -a 'name=openvswitch state=restarted' "
@@ -661,12 +636,14 @@ fi
 if [ $METRICS == "true" ]
 then
 	sleep 30
+	echo $(date) "- Determining Origin version from rpm"
+	OO_VERSION=$(rpm -q origin | cut -d'-' -f 2)
 	echo $(date) "- Deploying Metrics"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
+		runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic -e openshift_hosted_metrics_deployer_version=$OO_VERSION""
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True"
+		runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/byo/openshift-cluster/openshift-metrics.yml -e openshift_metrics_install_metrics=True -e openshift_hosted_metrics_deployer_version=$OO_VERSION""
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -704,7 +681,6 @@ echo $(date) "- Deleting post installation files"
 rm /home/${SUDOUSER}/addocpuser.yml
 rm /home/${SUDOUSER}/assignclusteradminrights.yml
 rm /home/${SUDOUSER}/dockerregistry.yml
-rm /home/${SUDOUSER}/assignrootpassword.yml
 rm /home/${SUDOUSER}/setup-azure-master.yml
 rm /home/${SUDOUSER}/setup-azure-node-master.yml
 rm /home/${SUDOUSER}/setup-azure-node.yml

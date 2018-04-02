@@ -429,9 +429,9 @@ openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 # Enable service catalog
-# openshift_enable_service_catalog=false
+openshift_enable_service_catalog=false
 # Enable template service broker (requires service catalog to be enabled, above)
-# template_service_broker_install=false
+template_service_broker_install=false
 # Configure one of more namespaces whose templates will be served by the TSB
 openshift_template_service_broker_namespaces=['openshift']
 template_service_broker_selector={"type":"infra"}

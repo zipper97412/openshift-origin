@@ -6,6 +6,8 @@ For the **OpenShift Container Platform** refer to https://github.com/Microsoft/o
 
 ## OpenShift Origin 3.7 with Username / Password for OpenShift in Azure Stack
 
+Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
+
 This template deploys OpenShift Origin with basic username / password for authentication to OpenShift. This uses CentOS and includes the following resources:
 
 |Resource           |Properties                                                                                                                          |

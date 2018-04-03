@@ -9,6 +9,13 @@ This CHANGELOG.md file will contain the update log for the latest set of updates
 5.  Lock to docker 1.12.6
 
 
+# UPDATES for Origin 3.7 - February 19, 2018
+
+1.  Add additional label to infra nodes to address TSB install.
+2.  Include commands to address ASB issue after Azure Cloud Provider setup.
+3.  Remove reference to Cockpit.
+
+
 # UPDATES for Origin 3.7 - January 16, 2018
 
 1.  Add support for managed and unmanaged disks.

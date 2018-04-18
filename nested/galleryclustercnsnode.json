@@ -4,21 +4,18 @@
 	"parameters": {
 		"location": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Datacenter Region Location"
 			}
 		},
 		"sshKeyPath": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "SSH Public Key Path"
 			}
 		},
 		"sshPublicKey": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "SSH Public Key"
 			}
@@ -29,30 +26,32 @@
 				"description": "Size of Data Disk"
 			}
 		},
+		"glusterDiskSize": {
+			"type": "int",
+			"metadata": {
+				"description": "Size of Data Disks for Gluster"
+			}
+		},
 		"adminUsername": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Admin Username"
 			}
 		},
 		"vmSize": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Size"
 			}
 		},
 		"availabilitySet": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "Name of Availibility Set"
 			}
 		},
-		"hostname": {
+		"hostName": {
 			"type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "VM Hostname"
 			}
@@ -151,6 +150,30 @@
 					"storageAccountType": "[parameters('vmStorageType')]"
 				},
 				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk0')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 1,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk1')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 2,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostName'), '-gluster-disk2')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 3,
+				"managedDisk": {
+					"storageAccountType": "[parameters('vmStorageType')]"
+				},
+				"createOption": "Empty"
 			}]
 		},
 		"unmanagedStorageProfile": {
@@ -172,19 +195,43 @@
 					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-docker-pool.vhd')]"
 				},
 				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk0')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 1,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk0.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk1')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 2,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk1.vhd')]"
+				},
+				"createOption": "Empty"
+			},  {
+				"name": "[concat(parameters('hostname'), '-gluster-disk2')]",
+				"diskSizeGB": "[parameters('glusterDiskSize')]",
+				"lun": 3,
+				"vhd": {
+					"uri": "[concat(parameters('unmanagedDataDiskUri'), 'vhds/', parameters('hostname'), '-gluster-disk2.vhd')]"
+				},
+				"createOption": "Empty"
 			}]
 		},
 		"storageProfile": "[concat(parameters('storageKind'), 'StorageProfile')]"
 	},
 	"resources": [{
 		"type": "Microsoft.Compute/virtualMachines",
-		"name": "[parameters('hostname')]",
+		"name": "[parameters('hostName')]",
 		"location": "[parameters('location')]",
 		"apiVersion": "[parameters('apiVersionCompute')]",
 		"tags": {
 			"Role": "[parameters('role')]",
 			"provider": "[parameters('redHatTags').provider]",
-			"app": "[parameters('redHatTags').app]"
+			"app": "[parameters('redHatTags').app]",
 			"version": "[parameters('redHatTags').version]",
 			"platform": "[parameters('redHatTags').platform]"
 		},
@@ -196,7 +243,7 @@
 				"vmSize": "[parameters('vmSize')]"
 			},
 			"osProfile": {
-				"computerName": "[parameters('hostname')]",
+				"computerName": "[parameters('hostName')]",
 				"adminUsername": "[parameters('adminUsername')]",
 				"linuxConfiguration": {
 					"disablePasswordAuthentication": true,
@@ -211,7 +258,7 @@
 			"storageProfile": "[variables(variables('storageProfile'))]",
 			"networkProfile": {
 				"networkInterfaces": [{
-					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostname'), '-nic'))]"
+					"id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('hostName'), '-nic'))]"
 				}]
 			},
 			"diagnosticsProfile": {

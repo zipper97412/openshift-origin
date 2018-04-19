@@ -23,6 +23,21 @@ yum -y --enablerepo=epel install ansible pyOpenSSL python-passlib
 # Grow Root File System
 echo $(date) " - Grow Root FS"
 
+lvmcheck=`lvdisplay`
+
+if [ -z "$lvmcheck" ]
+then
+
+# LVM in use - extend using lvextend command
+
+rootdev=`findmnt --target / -o SOURCE -n`
+lvextend -l +100%FREE $rootdev
+resize2fs $rootdev || xfs_growfs $rootdev
+
+else
+
+# Non LVM in use - using growpart command 
+
 rootdev=`findmnt --target / -o SOURCE -n`
 rootdrivename=`lsblk -no pkname $rootdev`
 rootdrive="/dev/"$rootdrivename
@@ -31,6 +46,7 @@ part_number=${name#*${rootdrivename}}
 
 growpart $rootdrive $part_number -u on
 xfs_growfs $rootdev
+fi
 
 # Install Docker 1.13.x
 echo $(date) " - Installing Docker 1.13.x"

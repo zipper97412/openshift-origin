@@ -45,7 +45,7 @@ else
 
 rootdev=`findmnt --target / -o SOURCE -n`
 lvextend -l +100%FREE $rootdev
-resize2fs $rootdev || xfs_growfs $rootdev
+xfs_growfs $rootdev
 
 fi
 

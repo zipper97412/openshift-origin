@@ -4,7 +4,7 @@ Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
 For the **OpenShift Container Platform** refer to https://github.com/Microsoft/openshift-container-platform
 
-## OpenShift Origin 3.7 with Username / Password for OpenShift in Azure Stack
+## OpenShift Origin 3.9 with Username / Password for OpenShift in Azure Stack
 
 Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
@@ -24,6 +24,8 @@ This template deploys OpenShift Origin with basic username / password for authen
 ## READ the instructions in its entirety before deploying!
 
 Currently, the Azure Cloud Provider does not work in Azure Stack. This means you will not be able to use disk attach for persistent storage in Azure Stack. You can always configure other storage options such as NFS, iSCSI, Gluster, etc. that can be used for persistent storage. We are exploring options to address the Azure Cloud Provider in Azure Stack but this will take a little bit of time.
+
+As an alternative, you can choose to enable CNS and use Gluster for persistent storage.  If CNS is enabled, three additional nodes will be deployed with additional storage for Gluster. 
 
 Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
 
@@ -80,13 +82,14 @@ You will need to create a Key Vault to store your SSH Private Key that will then
 11. openshiftPassword: Password for OpenShift login
 11. enableMetrics: Enable Metrics - value is either "true" or "false"
 11. enableLogging: Enable Logging - value is either "true" or "false"
+11. enableCNS: Enable Container Native Storage (CNS) - value is either "true" or "false".  If set to true, 3 additional nodes will be deployed for CNS
 12. sshPublicKey: Copy your SSH Public Key here
 14. keyVaultResourceGroup: The name of the Resource Group that contains the Key Vault
 15. keyVaultName: The name of the Key Vault you created
 16. keyVaultSecret: The Secret Name you used when creating the Secret (that contains the Private Key)
 18. enableAzure: Enable Azure Cloud Provider - value is only "false". When Azure Cloud Provider is supported in Azure Stack, this will be updated
-18. aadClientId: Azure Active Directory Client ID also known as Application ID for Service Principal
-18. aadClientSecret: Azure Active Directory Client Secret for Service Principal
+18. aadClientId: Currently not used.  Place holder for when Azure Cloud Provider is supported in Azure Stack. Azure Active Directory Client ID also known as Application ID for Service Principal
+18. aadClientSecret: Currently not used.  Place holder for when Azure Cloud Provider is supported in Azure Stack. Azure Active Directory Client Secret for Service Principal
 17. defaultSubDomainType: This will either be nipio (if you don't have your own domain) or custom if you have your own domain that you would like to use for routing
 18. defaultSubDomain: The wildcard DNS name you would like to use for routing if you selected custom above.  If you selected nipio above, then this field will be ignored
 
@@ -113,6 +116,10 @@ The cluster will use self-signed certificates. Accept the warning and proceed to
 
 ### NOTE
 
+The Service Catalog, Ansible Service Broker, and Template Service Broker will only deploy if CNS is enabled due to requirement for persistent storage.
+
+If CNS is enabled, the Registry will use Gluster for persistent storage; otherwise, it will use ephemeral storage.
+
 Be sure to follow the OpenShift instructions to create the necessary DNS entry for the OpenShift Router for access to applications.
 
 ### TROUBLESHOOTING
@@ -130,13 +137,13 @@ You should see a folder named '0' and '1'. In each of these folders, you will se
 
 **Metrics**
 
-If you deployed Metrics, it will take a few extra minutes deployment to complete. Please be patient.
+If you deployed Metrics, it will take a few extra minutes deployment to complete. Please be patient.  If enableCNS is set to true, then Metrics will use Gluster for persistent storage.  Otherwise, it will use ephemeral storage.
 
 Once the deployment is complete, log into the OpenShift Web Console and complete an addition configuration step.  Go to the openshift-infra project, click on Hawkster metrics route, and accept the SSL exception in your browser.
 
 **Logging**
 
-If you deployed Logging, it will take a few extra minutes deployment to complete. Please be patient.
+If you deployed Logging, it will take a few extra minutes deployment to complete. Please be patient.  If enableCNS is set to true, then Logging will use Gluster for persistent storage.  Otherwise, it will use ephemeral storage.
 
 Once the deployment is complete, log into the OpenShift Web Console and complete an addition configuration step.  Go to the logging project, click on the Kubana route, and accept the SSL exception in your browser.
 

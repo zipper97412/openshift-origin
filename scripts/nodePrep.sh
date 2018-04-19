@@ -28,14 +28,6 @@ lvmcheck=`lvdisplay`
 if [ -z "$lvmcheck" ]
 then
 
-# LVM in use - extend using lvextend command
-
-rootdev=`findmnt --target / -o SOURCE -n`
-lvextend -l +100%FREE $rootdev
-resize2fs $rootdev || xfs_growfs $rootdev
-
-else
-
 # Non LVM in use - using growpart command 
 
 rootdev=`findmnt --target / -o SOURCE -n`
@@ -46,6 +38,15 @@ part_number=${name#*${rootdrivename}}
 
 growpart $rootdrive $part_number -u on
 xfs_growfs $rootdev
+
+else
+
+# LVM in use - extend using lvextend command
+
+rootdev=`findmnt --target / -o SOURCE -n`
+lvextend -l +100%FREE $rootdev
+resize2fs $rootdev || xfs_growfs $rootdev
+
 fi
 
 # Install Docker 1.13.x

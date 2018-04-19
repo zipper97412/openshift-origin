@@ -1751,7 +1751,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'), ' ', parameters('rhsmUsernameOrOrgId'), ' ', variables('singlequote'), parameters('rhsmPasswordOrActivationKey'), variables('singlequote'), ' ', parameters('rhsmPoolId'))]"
+					"commandToExecute": "[concat('bash ', variables('nodePrepScriptFileName'))]"
 				}
 			}
 		}, {

@@ -360,8 +360,8 @@
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
 		"imageReference": {
 			"publisher": "OpenLogic",
-			"offer": "CentOS-LVM",
-			"sku": "7-LVM",
+			"offer": "CentOS",
+			"sku": "7.4",
 			"version": "latest"
 		},
 		"redHatTags": {

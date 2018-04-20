@@ -341,12 +341,14 @@
 		"infraLbHttpsProbeId": "[concat(variables('infraLbId'),'/probes/httpsProbe')]",
 		"imageReference": {
 			"publisher": "OpenLogic",
-			"offer": "CentOS-LVM",
-			"sku": "7-LVM",
+			"offer": "CentOS",
+			"sku": "7.4",
 			"version": "latest"
 		},
 		"redHatTags": {
 			"app": "OpenShiftOrigin",
+			"version": "3.7",
+			"platform": "AzureStack",
 			"provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
 		},
 		"singlequote": "'",
@@ -679,7 +681,9 @@
 			"tags": {
 				"displayName": "MasterNSG",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -718,7 +722,9 @@
 			"tags": {
 				"displayName": "InfraNSG",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -770,7 +776,9 @@
 			"tags": {
 				"displayName": "NodeNSG",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"securityRules": [{
@@ -821,7 +829,9 @@
 			"tags": {
 				"displayName": "VirtualNetwork",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"apiVersion": "[variables('apiVersionNetwork')]",
 			"properties": {
@@ -851,7 +861,9 @@
 			"tags": {
 				"displayName": "[variables('newStorageAccountArray')[copyIndex()].tagName]",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"copy": {
 				"name": "storageLoop",
@@ -868,7 +880,9 @@
 			"tags": {
 				"displayName": "OpenShiftInfraLBPublicIP",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"publicIPAllocationMethod": "Static",
@@ -884,7 +898,9 @@
 			"tags": {
 				"displayName": "OpenShiftMasterPublicIP",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"properties": {
 				"publicIPAllocationMethod": "Static",
@@ -904,7 +920,9 @@
 			"tags": {
 				"displayName": "[variables('availabilitySetArray')[copyIndex()].tagName]",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"copy": {
 				"name": "availabiltySetLoop",
@@ -918,7 +936,9 @@
 			"tags": {
 				"displayName": "OpenShiftMasterLB",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))]"
@@ -995,7 +1015,9 @@
 			"tags": {
 				"displayName": "OpenShiftInfraLB",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Network/publicIPAddresses/', variables('infraLbPublicIpDnsLabel'))]"
@@ -1071,7 +1093,9 @@
 			"tags": {
 				"displayName": "OpenShiftMasterNetworkInterface",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
@@ -1113,7 +1137,9 @@
 			"tags": {
 				"displayName": "OpenShiftInfraNetworkInterfaces",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
@@ -1149,7 +1175,9 @@
 			"tags": {
 				"displayName": "OpenShiftNodeNetworkInterfaces",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
@@ -1427,7 +1455,9 @@
 			"tags": {
 				"displayName": "PrepMaster",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('masterVmDeployment', copyindex())]"
@@ -1458,7 +1488,9 @@
 			"tags": {
 				"displayName": "PrepInfra",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('infraVmDeployment', copyindex())]"
@@ -1489,7 +1521,9 @@
 			"tags": {
 				"displayName": "PrepNodes",
 				"provider": "[variables('redHatTags').provider]",
-				"app": "[variables('redHatTags').app]"
+				"app": "[variables('redHatTags').app]",
+				"version": "[variables('redHatTags').version]",
+				"platform": "[variables('redHatTags').platform]"
 			},
 			"dependsOn": [
 				"[concat('nodeVmDeployment', copyindex())]"

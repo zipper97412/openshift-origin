@@ -409,9 +409,9 @@ if [ $METRICS == "true" ]
 then
 	sleep 30	
 	echo $(date) "- Determining Origin version from rpm"
-	OO_VERSION=$(rpm -q origin | cut -d'-' -f 2 | head -c 3)	
+	OO_VERSION="v"$(rpm -q origin | cut -d'-' -f 2 | head -c 3)	
 	echo $(date) "- Deploying Metrics"
-	if [ $AZURE == "true" ]
+	if [ $ENABLECNS == "true" ]
 	then
 		runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic -e openshift_hosted_metrics_deployer_version=$OO_VERSION"
 	else
@@ -432,7 +432,7 @@ if [ $LOGGING == "true" ]
 then
 	sleep 60
 	echo $(date) "- Deploying Logging"
-	if [ $AZURE == "true" ]
+	if [ $ENABLECNS == "true" ]
 	then
 		runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true -e openshift_master_dynamic_provisioning_enabled=True"
 	else

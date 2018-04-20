@@ -36,14 +36,31 @@ yum -y install java-1.8.0-openjdk-headless
 # Grow Root File System
 echo $(date) " - Grow Root FS"
 
+lvmcheck=`lvdisplay`
+
+if [ -z "$lvmcheck" ]
+then
+
+# Non LVM in use - using growpart command 
+
 rootdev=`findmnt --target / -o SOURCE -n`
 rootdrivename=`lsblk -no pkname $rootdev`
 rootdrive="/dev/"$rootdrivename
-majorminor=`lsblk  $rootdev -o MAJ:MIN | tail -1`
-part_number=${majorminor#*:}
+name=`lsblk  $rootdev -o NAME | tail -1`
+part_number=${name#*${rootdrivename}}
 
 growpart $rootdrive $part_number -u on
 xfs_growfs $rootdev
+
+else
+
+# LVM in use - extend using lvextend command
+
+rootdev=`findmnt --target / -o SOURCE -n`
+lvextend -l +100%FREE $rootdev
+xfs_growfs $rootdev
+
+fi
 
 # Install Docker 1.12.x
 echo $(date) " - Installing Docker 1.12.x"

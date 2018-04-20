@@ -15,25 +15,45 @@ echo $(date) " - Update system to latest packages and install dependencies"
 yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct
 yum -y install cloud-utils-growpart.noarch
 yum -y update --exclude=WALinuxAgent
+yum -y update glusterfs-fuse
+
+echo $(date) " - Installing Ansible, pyOpenSSL and python-passlib"
+yum -y --enablerepo=epel install ansible pyOpenSSL python-passlib
 
 # Grow Root File System
 echo $(date) " - Grow Root FS"
 
+lvmcheck=`lvdisplay`
+
+if [ -z "$lvmcheck" ]
+then
+
+# Non LVM in use - using growpart command 
+
 rootdev=`findmnt --target / -o SOURCE -n`
 rootdrivename=`lsblk -no pkname $rootdev`
 rootdrive="/dev/"$rootdrivename
-majorminor=`lsblk  $rootdev -o MAJ:MIN | tail -1`
-part_number=${majorminor#*:}
+name=`lsblk  $rootdev -o NAME | tail -1`
+part_number=${name#*${rootdrivename}}
 
 growpart $rootdrive $part_number -u on
 xfs_growfs $rootdev
 
-# Install Docker 1.12.x
-echo $(date) " - Installing Docker 1.12.x"
+else
 
-yum -y install docker-1.12.6
-yum -y install yum-plugin-versionlock
-yum versionlock docker-client-1.12.6 docker-common-1.12.6 docker-rhel-push-plugin-1.12.6 docker-1.12.6
+# LVM in use - extend using lvextend command
+
+rootdev=`findmnt --target / -o SOURCE -n`
+lvextend -l +100%FREE $rootdev
+xfs_growfs $rootdev
+
+fi
+
+# Install Docker 1.13.x
+echo $(date) " - Installing Docker 1.13.x"
+
+yum -y install docker
+
 sed -i -e "s#^OPTIONS='--selinux-enabled'#OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'#" /etc/sysconfig/docker
 
 # Create thin pool logical volume for Docker

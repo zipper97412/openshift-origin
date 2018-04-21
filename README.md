@@ -23,9 +23,11 @@ This template deploys OpenShift Origin with basic username / password for authen
 
 ## READ the instructions in its entirety before deploying!
 
+This template is referencing a CentOS image that may or may not be valid for you. Please verify in your Azure Stack environment and compare with the imageReference variable at line 342 of azuredeploy.json. If yours is different, please fork this repo and update the imageReference variable with your image information.
+
 Currently, the Azure Cloud Provider does not work in Azure Stack. This means you will not be able to use disk attach for persistent storage in Azure Stack. You can always configure other storage options such as NFS, iSCSI, Gluster, etc. that can be used for persistent storage. We are exploring options to address the Azure Cloud Provider in Azure Stack but this will take a little bit of time.
 
-Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started
+Additional documentation for deploying OpenShift in Azure can be found here: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-get-started.  The official OpenShift Origin 3.7 documentation can be found here: https://docs.openshift.org/3.7/welcome/index.html.
 
 This template deploys multiple VMs and requires some pre-work before you can successfully deploy the OpenShift Cluster. If you don't get the pre-work done correctly, you will most likely fail to deploy the cluster using this template.  Please read the instructions completely before you proceed.
 
@@ -107,7 +109,7 @@ az group deployment create --resource-group OpenShiftTestRG --template-file azur
 
 Monitor deployment via CLI or Portal and get the console URL from outputs of successful deployment which will look something like (if using sample parameters file and "West US 2" location):
 
-`https://me-master1.westus2.cloudapp.azure.com:443/console`
+`https://me-master1.westus2.cloudapp.azure.com/console`
 
 The cluster will use self-signed certificates. Accept the warning and proceed to the login page.
 

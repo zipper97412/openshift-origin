@@ -1,15 +1,4 @@
-# OpenShift Origin Deployment Template
-
-## NOTE: Structural change to Repo
-
-The master branch will now contain the most current release of OpenShift Origin with experimental items.  This may cause instability but will include new things or try new things.
-
-We now have branches for the stable releases:
-- release-3.6
-- release-3.7
-- azurestack-release-3.7
-- azurestack-release-3.9
-- etc.
+# OpenShift Origin Deployment Template - Release 3.9
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 

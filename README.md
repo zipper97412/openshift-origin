@@ -10,6 +10,8 @@ Change log located in CHANGELOG.md
 
 ## OpenShift Origin 3.9 with Username / Password
 
+Re-introduced non-HA configuration with 1 master as well as 1 infra.
+
 To view all the default templates, please select from the openshift project.
 
 This template deploys OpenShift Origin with basic username / password for authentication to OpenShift. This uses CentOS and includes the following resources:
@@ -17,14 +19,14 @@ This template deploys OpenShift Origin with basic username / password for authen
 |Resource           |Properties                                                                                                                          |
 |-------------------|------------------------------------------------------------------------------------------------------------------------------------|
 |Virtual Network   		|**Address prefix:** 10.0.0.0/8<br />**Master subnet:** 10.1.0.0/16<br />**Node subnet:** 10.2.0.0/16                      |
-|Master Load Balancer	|2 probes and 2 rules for TCP 8443 and TCP 9090 <br/> NAT rules for SSH on Ports 2200-220X                                           |
-|Infra Load Balancer	|3 probes and 3 rules for TCP 80, TCP 443 and TCP 9090 									                                             |
+|Master Load Balancer	|1 probe and 1 rule for TCP 443<br/> NAT rules for SSH on Ports 2200-220X                                           |
+|Infra Load Balancer	|2 probes and 2 rules for TCP 80 and TCP 443								                                             |
 |Public IP Addresses	|OpenShift Master public IP attached to Master Load Balancer<br />OpenShift Router public IP attached to Infra Load Balancer            |
 |Storage Accounts <br />Unmanaged Disks  	|1 Storage Account for Master VMs <br />1 Storage Account for Infra VMs<br />2 Storage Accounts for Node VMs<br />2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry<br />1 Storage Account for Persistent Volumes  |
 |Storage Accounts <br />Managed Disks      |2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry |
 |Network Security Groups|1 Network Security Group Master VMs<br />1 Network Security Group for Infra VMs<br />1 Network Security Group for Node VMs  |
 |Availability Sets      |1 Availability Set for Master VMs<br />1 Availability Set for Infra VMs<br />1 Availability Set for Node VMs  |
-|Virtual Machines   	|3 or 5 Masters. First Master is used to run Ansible Playbook to install OpenShift<br />2 or 3 Infra nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
+|Virtual Machines   	|1, 3 or 5 Masters. First Master is used to run Ansible Playbook to install OpenShift<br />1, 2 or 3 Infra nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
 
 If you have a Red Hat subscription and would like to deploy an OpenShift Container Platform (formerly OpenShift Enterprise) cluster, please visit: https://github.com/Microsoft/openshift-container-platform
 
@@ -110,7 +112,7 @@ The appId is used for the aadClientId parameter.
 8.  masterInstanceCount: Number of Masters nodes to deploy
 8.  infraInstanceCount: Number of infra nodes to deploy
 9.  nodeInstanceCount: Number of Nodes to deploy
-9.  dataDiskSize: Size of data disk to attach to nodes for Docker volume - valid sizes are 128 GB, 512 GB and 1023 GB
+9.  dataDiskSize: Size of data disk to attach to nodes for Docker volume - valid sizes are 32, 64, 128, 256, 512, 1024, 2048 (in GB)
 10. adminUsername: Admin username for both OS login and OpenShift login
 11. openshiftPassword: Password for OpenShift login
 11. enableMetrics: Enable Metrics - value is either "true" or "false"
@@ -189,3 +191,4 @@ Few options you have
    sudo htpasswd /etc/origin/master/htpasswd user1
    ```
   now this user can login with the 'oc' CLI tool or the openshift console url
+

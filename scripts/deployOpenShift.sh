@@ -467,11 +467,9 @@ openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 # Enable service catalog
-# openshift_enable_service_catalog=false
+openshift_enable_service_catalog=false
 # Enable template service broker (requires service catalog to be enabled, above)
 # template_service_broker_install=false
-# Configure one of more namespaces whose templates will be served by the TSB
-openshift_template_service_broker_namespaces=['openshift']
 # Disable the OpenShift SDN plugin
 openshift_use_openshift_sdn=true
 
@@ -645,8 +643,13 @@ then
 
 	runuser -l $SUDOUSER -c  "ansible nodes -b  -m service -a 'name=origin-node state=restarted' "
 	sleep 10
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb -n openshift-ansible-service-broker"
-	runuser -l $SUDOUSER -c "oc rollout latest dc/asb-etcd -n openshift-ansible-service-broker"
+	
+	# Installing Service Catalog, Ansible Service Broker and Template Service Broker
+	
+	echo $(date) "- Installing Service Catalog, Ansible Service Broker and Template Service Broker"
+	runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/byo/openshift-cluster/service-catalog.yml"
+	echo $(date) "- Service Catalog, Ansible Service Broker and Template Service Broker installed successfully"
+
 
 fi
 

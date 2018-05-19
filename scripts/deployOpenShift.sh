@@ -392,6 +392,39 @@ cat > /home/${SUDOUSER}/masternonschedulable.yml <<EOF
     command: oadm manage-node {{inventory_hostname}} --schedulable=false
 EOF
 
+# Create Master nodes grouping
+echo $(date) " - Creating Master nodes grouping"
+
+for (( c=0; c<$MASTERCOUNT; c++ ))
+do
+  mastergroup="$mastergroup
+$MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c"
+done
+
+# Create Infra nodes grouping 
+echo $(date) " - Creating Infra nodes grouping"
+
+for (( c=0; c<$INFRACOUNT; c++ ))
+do
+  infragroup="$infragroup
+$INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$INFRA-$c"
+done
+
+# Create Nodes grouping
+echo $(date) " - Creating Nodes grouping"
+
+for (( c=0; c<$NODECOUNT; c++ ))
+do
+  nodegroup="$nodegroup
+$NODE-$c openshift_node_labels=\"{'region': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c"
+done
+
+# Set HA mode if 3 or 5 masters chosen
+if [[ $MASTERCOUNT != 1 ]]
+then
+	export HAMODE="openshift_master_cluster_method=native"
+fi
+
 # Create Ansible Hosts File
 echo $(date) " - Create Ansible Hosts file"
 
@@ -419,13 +452,13 @@ osm_use_cockpit=false
 os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 #console_port=443
 openshift_cloudprovider_kind=azure
-osm_default_node_selector='type=app'
+osm_default_node_selector='region=app'
 openshift_disable_check=disk_availability,memory_availability
 # default selectors for router and registry services
-openshift_router_selector='type=infra'
-openshift_registry_selector='type=infra'
+openshift_router_selector='region=infra'
+openshift_registry_selector='region=infra'
 
-openshift_master_cluster_method=native
+$HAMODE
 openshift_master_cluster_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
@@ -447,9 +480,9 @@ openshift_metrics_install_metrics=false
 #openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_start_cluster=true
 openshift_metrics_startup_timeout=120
-openshift_metrics_hawkular_nodeselector={"type":"infra"}
-openshift_metrics_cassandra_nodeselector={"type":"infra"}
-openshift_metrics_heapster_nodeselector={"type":"infra"}
+openshift_metrics_hawkular_nodeselector={"region":"infra"}
+openshift_metrics_cassandra_nodeselector={"region":"infra"}
+openshift_metrics_heapster_nodeselector={"region":"infra"}
 openshift_hosted_metrics_public_url=https://metrics.$ROUTING/hawkular/metrics
 
 # Setup logging
@@ -457,9 +490,9 @@ openshift_logging_install_logging=false
 #openshift_logging_es_pvc_dynamic=true
 openshift_logging_es_pvc_storage_class_name=generic
 openshift_logging_fluentd_nodeselector={"logging":"true"}
-openshift_logging_es_nodeselector={"type":"infra"}
-openshift_logging_kibana_nodeselector={"type":"infra"}
-openshift_logging_curator_nodeselector={"type":"infra"}
+openshift_logging_es_nodeselector={"region":"infra"}
+openshift_logging_kibana_nodeselector={"region":"infra"}
+openshift_logging_curator_nodeselector={"region":"infra"}
 openshift_master_logging_public_url=https://kibana.$ROUTING
 openshift_logging_master_public_url=https://$MASTERPUBLICIPHOSTNAME:8443
 
@@ -476,34 +509,11 @@ $MASTER-0
 
 # host group for nodes
 [nodes]
-EOF
+$mastergroup
+$infragroup
+$nodegroup
 
-# Loop to add Masters
-
-for (( c=0; c<$MASTERCOUNT; c++ ))
-do
-  echo "$MASTER-$c openshift_node_labels=\"{'type': 'master', 'zone': 'default'}\" openshift_hostname=$MASTER-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Infra Nodes
-
-for (( c=0; c<$INFRACOUNT; c++ ))
-do
-  echo "$INFRA-$c openshift_node_labels=\"{'type': 'infra', 'zone': 'default', 'region': 'infra'}\" openshift_hostname=$INFRA-$c" >> /etc/ansible/hosts
-done
-
-# Loop to add Nodes
-
-for (( c=0; c<$NODECOUNT; c++ ))
-do
-  echo "$NODE-$c openshift_node_labels=\"{'type': 'app', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
-done
-
-# Create new_nodes group
-
-cat >> /etc/ansible/hosts <<EOF
-
-# host group for adding new nodes
+# host group for new nodes
 [new_nodes]
 EOF
 

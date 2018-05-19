@@ -1,13 +1,4 @@
-# OpenShift Origin Deployment Template
-
-## NOTE: Structural change to Repo
-
-The master branch will now contain the most current release of OpenShift Origin with experimental items.  This may cause instability but will include new things or try new things.
-
-We will now have branches for the stable releases:
-- Release-3.6
-- Release-3.7
-- etc.
+# OpenShift Origin Deployment Template - Release 3.7
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
@@ -18,8 +9,6 @@ Additional documentation for deploying OpenShift in Azure can be found here: htt
 Change log located in CHANGELOG.md
 
 ## OpenShift Origin 3.7 with Username / Password
-
-Due to some issues, this template does not enable the Service Catalog or the Template Service Broker.  We will enable this in a future update once the issue is resolved.
 
 To view all the default templates, please select from the openshift project.
 

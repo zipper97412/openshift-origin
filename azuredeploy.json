@@ -127,7 +127,6 @@
 		"dataDiskSize": {
 			"type": "int",
 			"defaultValue": 64,
-			"minValue": 1,
 			"allowedValues": [32, 64, 128, 256, 512, 1024, 2048],
 			"metadata": {
 				"description": "Size of Datadisk in GB for Docker volume"
@@ -199,7 +198,7 @@
 			}
 		},
 		"keyVaultSecret": {
-			"type": "securestring",
+			"type": "string",
 			"minLength": 1,
 			"metadata": {
 				"description": "Key Vault Secret Name that contains the Private Key"

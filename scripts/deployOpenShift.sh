@@ -512,6 +512,7 @@ runuser -l $SUDOUSER -c "git clone -b release-3.7 https://github.com/openshift/o
 
 echo $(date) " - Running network_manager.yml playbook"
 DOMAIN=`domainname -d`
+DNSSERVER=`tail -1 /etc/resolv.conf | cut -d ' ' -f 2`
 
 # Setup NetworkManager to manage eth0
 runuser -l $SUDOUSER -c "ansible-playbook openshift-ansible/playbooks/byo/openshift-node/network_manager.yml"
@@ -519,10 +520,10 @@ runuser -l $SUDOUSER -c "ansible-playbook openshift-ansible/playbooks/byo/opensh
 echo $(date) " - Setting up NetworkManager on eth0"
 # Configure resolv.conf on all hosts through NetworkManager
 
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
-sleep 5
-runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
+runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=NetworkManager state=restarted\""
+runuser -l $SUDOUSER -c "ansible all -b -o -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN, ipv4.dns $DNSSERVER\""
+runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=NetworkManager state=restarted\""
+echo $(date) " - NetworkManager configuration complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"

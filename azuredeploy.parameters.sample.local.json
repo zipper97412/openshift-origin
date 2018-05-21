@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"_artifactsLocation": {
-			"value": "https://raw.githubusercontent.com/Microsoft/openshift-origin/master/"
+			"value": "https://raw.githubusercontent.com/Microsoft/openshift-origin/release-3.7/"
 		},
 		"masterVmSize": {
 			"value": "Standard_DS3_v2"

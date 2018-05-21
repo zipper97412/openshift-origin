@@ -1,5 +1,11 @@
 This CHANGELOG.md file will contain the update log for the latest set of updates to the templates
 
+# UPDATES for Origin 3.7 - May 19, 2018
+
+1.  Adjust prep scripts and deployOpenShift script to correct NetworkManager configuration.
+2.  Enable single master option.
+
+
 # UPDATES for Origin 3.7 - February 19, 2018
 
 1.  Add additional label to infra nodes to address TSB install.

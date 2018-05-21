@@ -1,13 +1,4 @@
-# OpenShift Origin Deployment Template
-
-## NOTE: Structural change to Repo
-
-The master branch will now contain the most current release of OpenShift Origin with experimental items.  This may cause instability but will include new things or try new things.
-
-We will now have branches for the stable releases:
-- Release-3.6
-- Release-3.7
-- etc.
+# OpenShift Origin Deployment Template - Release 3.7
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
@@ -19,9 +10,9 @@ Change log located in CHANGELOG.md
 
 ## OpenShift Origin 3.7 with Username / Password
 
-Due to some issues, this template does not enable the Service Catalog or the Template Service Broker.  We will enable this in a future update once the issue is resolved.
-
 To view all the default templates, please select from the openshift project.
+
+Re-introduced non-HA deployment option with 1 Master node.
 
 This template deploys OpenShift Origin with basic username / password for authentication to OpenShift. This uses CentOS and includes the following resources:
 
@@ -35,7 +26,7 @@ This template deploys OpenShift Origin with basic username / password for authen
 |Storage Accounts <br />Managed Disks      |2 Storage Accounts for Diagnostics Logs <br />1 Storage Account for Private Docker Registry |
 |Network Security Groups|1 Network Security Group Master VMs<br />1 Network Security Group for Infra VMs<br />1 Network Security Group for Node VMs  |
 |Availability Sets      |1 Availability Set for Master VMs<br />1 Availability Set for Infra VMs<br />1 Availability Set for Node VMs  |
-|Virtual Machines   	|3 or 5 Masters. First Master is used to run Ansible Playbook to install OpenShift<br />2 or 3 Infra nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
+|Virtual Machines   	|1, 3 or 5 Masters. First Master is used to run Ansible Playbook to install OpenShift<br />1, 2 or 3 Infra nodes<br />User-defined number of Nodes (1 to 30)<br />All VMs include a single attached data disk for Docker thin pool logical volume|
 
 If you have a Red Hat subscription and would like to deploy an OpenShift Container Platform (formerly OpenShift Enterprise) cluster, please visit: https://github.com/Microsoft/openshift-container-platform
 
@@ -138,10 +129,10 @@ The appId is used for the aadClientId parameter.
 
 ## Deploy Template
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-origin%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
-<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-origin%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/AzureGov.png"/></a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-origin%2Frelease-3.7%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
+<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-origin%2Frelease-3.7%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/AzureGov.png"/></a>
 
-Once you have collected all of the prerequisites for the template, you can deploy the template by populating the *azuredeploy.parameters.local.json* file and executing Resource Manager deployment commands with PowerShell or the CLI.
+Once you have collected all of the prerequisites for the template, you can deploy the template by populating the *azuredeploy.parameters.sample.local.json* file and executing Resource Manager deployment commands with PowerShell or the CLI.
 
 For Azure CLI 2.0, sample commands:
 
@@ -181,7 +172,7 @@ You should see a folder named '0' and '1'. In each of these folders, you will se
 
 ### Additional OpenShift Configuration Options
 
-You can configure additional settings per the official [OpenShift Origin Documentation](https://docs.openshift.org/latest/welcome/index.html).
+You can configure additional settings per the official [OpenShift Origin Documentation](https://docs.openshift.org/3.7/welcome/index.html).
 
 Few options you have
 

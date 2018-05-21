@@ -48,6 +48,7 @@ echo $(date) "- Configuring SSH ControlPath to use shorter path name"
 sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
+sed -i -e "s/^#stdout_callback = skippy/stdout_callback = skippy/" /etc/ansible/ansible.cfg
 
 # Cloning Ansible playbook repository
 (cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git)
@@ -231,15 +232,14 @@ runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playboo
 echo $(date) " - DNS Hostname resolution check complete"
 
 # Setup NetworkManager to manage eth0
-echo $(date) " - Setting up NetworkManager on eth0"
-DOMAIN=`domainname -d`
 runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/openshift-node/network_manager.yml"
 
-sleep 20
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
-sleep 20
-runuser -l $SUDOUSER -c "ansible all -b -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN\""
-runuser -l $SUDOUSER -c "ansible all -b -m service -a \"name=NetworkManager state=restarted\""
+echo $(date) " - Setting up NetworkManager on eth0"
+# Configure resolv.conf on all hosts through NetworkManager
+
+runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=dbus state=restarted\""
+runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=NetworkManager state=restarted\""
+runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=network state=restarted\""
 echo $(date) " - NetworkManager configuration complete"
 
 # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
@@ -339,10 +339,10 @@ then
 	echo $(date) " - Rebooting cluster to complete installation"
 	runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
 	runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
-	runuser -l $SUDOUSER -c  "ansible localhost -b  -m service -a 'name=openvswitch state=restarted'"
-	runuser -l $SUDOUSER -c  "ansible localhost -b  -m service -a 'name=origin-master-api state=restarted'"
-	runuser -l $SUDOUSER -c  "ansible localhost -b  -m service -a 'name=origin-master-controllers state=restarted'"
-	runuser -l $SUDOUSER -c  "ansible localhost -b  -m service -a 'name=origin-node state=restarted'"
+	runuser -l $SUDOUSER -c  "ansible localhost -b -o -m service -a 'name=openvswitch state=restarted'"
+	runuser -l $SUDOUSER -c  "ansible localhost -b -o -m service -a 'name=origin-master-api state=restarted'"
+	runuser -l $SUDOUSER -c  "ansible localhost -b -o -m service -a 'name=origin-master-controllers state=restarted'"
+	runuser -l $SUDOUSER -c  "ansible localhost -b -o -m service -a 'name=origin-node state=restarted'"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master-origin.yaml"
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 

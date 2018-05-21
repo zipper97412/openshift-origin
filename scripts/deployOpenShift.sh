@@ -524,7 +524,7 @@ DOMAIN=`domainname -d`
 DNSSERVER=`tail -1 /etc/resolv.conf | cut -d ' ' -f 2`
 
 # Setup NetworkManager to manage eth0
-runuser -l $SUDOUSER -c "ansible-playbook openshift-ansible/playbooks/byo/openshift-node/network_manager.yml"
+runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/byo/openshift-node/network_manager.yml"
 
 echo $(date) " - Setting up NetworkManager on eth0"
 # Configure resolv.conf on all hosts through NetworkManager

@@ -225,7 +225,8 @@ EOF
 
 echo $(date) " - Cloning openshift-ansible repo for use in installation"
 
-runuser -l $SUDOUSER -c "git clone -b release-3.9 https://github.com/openshift/openshift-ansible /home/$SUDOUSER/openshift-ansible"
+#runuser -l $SUDOUSER -c "git clone -b release-3.9 https://github.com/openshift/openshift-ansible /home/$SUDOUSER/openshift-ansible"
+runuser -l $SUDOUSER -c "git clone -b release-3.9-dedalus-fix https://github.com/zipper97412/openshift-ansible /home/$SUDOUSER/openshift-ansible"
 chmod -R 777 /home/$SUDOUSER/openshift-ansible
 
 # Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script

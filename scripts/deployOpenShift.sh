@@ -231,7 +231,7 @@ chmod -R 777 /home/$SUDOUSER/openshift-ansible
 
 # Run a loop playbook to ensure DNS Hostname resolution is working prior to continuing with script
 echo $(date) " - Running DNS Hostname resolution check"
-runuser -l $SUDOUSER -c "ansible-playbook ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
+runuser -l $SUDOUSER -c "ansible-playbook -c paramiko ~/openshift-container-platform-playbooks/check-dns-host-name-resolution.yaml"
 echo $(date) " - DNS Hostname resolution check complete"
 
 # Setup NetworkManager to manage eth0
@@ -239,7 +239,7 @@ echo $(date) " - Setting up NetworkManager on eth0"
 DOMAIN=`domainname -d`
 DNSSERVER=`tail -1 /etc/resolv.conf | cut -d ' ' -f 2`
 
-runuser -l $SUDOUSER -c "ansible-playbook /home/$SUDOUSER/openshift-ansible/playbooks/openshift-node/network_manager.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -c paramiko /home/$SUDOUSER/openshift-ansible/playbooks/openshift-node/network_manager.yml"
 
 sleep 10
 runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=NetworkManager state=restarted\""
@@ -251,7 +251,7 @@ echo $(date) " - NetworkManager configuration complete"
 # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
 if [[ $AZURE == "true" ]]
 then
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -c paramiko -f 10 ~/openshift-container-platform-playbooks/create-azure-conf.yaml"
 	if [ $? -eq 0 ]
 	then
 		echo $(date) " - Creation of Cloud Provider Config (azure.conf) completed on all nodes successfully"
@@ -263,13 +263,13 @@ fi
 
 # Initiating installation of OpenShift Origin prerequisites using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook"
-runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/prerequisites.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/prerequisites.yml"
 echo $(date) " - Prerequisites check complete"
 
 # Initiating installation of OpenShift Origin using Ansible Playbook
 echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
 
-runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/deploy_cluster.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/deploy_cluster.yml"
 echo $(date) " - OpenShift Origin Cluster install complete"
 echo $(date) " - Running additional playbooks to finish configuring and installing other components"
 
@@ -285,17 +285,17 @@ sed -i -e "s/# Defaults    requiretty/Defaults    requiretty/" /etc/sudoers
 # Adding user to OpenShift authentication file
 echo $(date) "- Adding OpenShift user"
 
-runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/addocpuser.yaml"
+runuser $SUDOUSER -c "ansible-playbook -c paramiko -f 10 ~/openshift-container-platform-playbooks/addocpuser.yaml"
 
 # Assigning cluster admin rights to OpenShift user
 echo $(date) "- Assigning cluster admin rights to user"
 
-runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
+runuser $SUDOUSER -c "ansible-playbook -c paramiko -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
 # Configure Docker Registry to use Azure Storage Account
 echo $(date) "- Configuring Docker Registry to use Azure Storage Account"
 
-runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
+runuser $SUDOUSER -c "ansible-playbook -c paramiko -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 if [[ $AZURE == "true" ]]
 then
@@ -306,8 +306,8 @@ then
 	runuser -l $SUDOUSER -c  "ansible localhost -b -o -m service -a 'name=origin-master-api state=restarted'"
 	runuser -l $SUDOUSER -c  "ansible localhost -b -o -m service -a 'name=origin-master-controllers state=restarted'"
 	runuser -l $SUDOUSER -c  "ansible localhost -b -o -m service -a 'name=origin-node state=restarted'"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master-origin.yaml"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
+	runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 ~/openshift-container-platform-playbooks/reboot-master-origin.yaml"
+	runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 
 	if [ $? -eq 0 ]
 	then
@@ -320,14 +320,14 @@ then
 	# Create Storage Class
 	echo $(date) "- Creating Storage Class"
 
-	runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
+	runuser $SUDOUSER -c "ansible-playbook -c paramiko -f 10 ~/openshift-container-platform-playbooks/configurestorageclass.yaml"
 	echo $(date) "- Sleep for 15"
 	sleep 15
 	
 	# Installing Service Catalog, Ansible Service Broker and Template Service Broker
 	
 	echo $(date) "- Installing Service Catalog, Ansible Service Broker and Template Service Broker"
-	runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
+	runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-service-catalog/config.yml"
 	echo $(date) "- Service Catalog, Ansible Service Broker and Template Service Broker installed successfully"
 	
 fi
@@ -342,9 +342,9 @@ then
 	echo $(date) "- Deploying Metrics"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic -e openshift_metrics_image_version=$OO_VERSION"
+		runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic -e openshift_metrics_image_version=$OO_VERSION"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_image_version=$OO_VERSION"
+		runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_image_version=$OO_VERSION"
 	fi
 	if [ $? -eq 0 ]
 	then
@@ -363,9 +363,9 @@ then
 	echo $(date) "- Deploying Logging"
 	if [ $AZURE == "true" ]
 	then
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true -e openshift_master_dynamic_provisioning_enabled=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true -e openshift_master_dynamic_provisioning_enabled=True"
 	else
-		runuser -l $SUDOUSER -c "ansible-playbook -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True"
+		runuser -l $SUDOUSER -c "ansible-playbook -c paramiko -f 10 /home/$SUDOUSER/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True"
 	fi
 	if [ $? -eq 0 ]
 	then

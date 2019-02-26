@@ -223,6 +223,8 @@ $nodegroup
 [new_nodes]
 EOF
 
+env > cleanme.env
+
 echo $(date) " - Cloning openshift-ansible repo for use in installation"
 
 #runuser -l $SUDOUSER -c "git clone -b release-3.9 https://github.com/openshift/openshift-ansible /home/$SUDOUSER/openshift-ansible"
@@ -240,3 +242,4 @@ DOMAIN=`domainname -d`
 DNSSERVER=`tail -1 /etc/resolv.conf | cut -d ' ' -f 2`
 
 runuser -l $SUDOUSER -c "ansible-playbook -c paramiko /home/$SUDOUSER/openshift-ansible/playbooks/openshift-node/network_manager.yml"
+

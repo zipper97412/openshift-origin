@@ -242,10 +242,10 @@ DNSSERVER=`tail -1 /etc/resolv.conf | cut -d ' ' -f 2`
 runuser -l $SUDOUSER -c "ansible-playbook -c paramiko /home/$SUDOUSER/openshift-ansible/playbooks/openshift-node/network_manager.yml"
 
 sleep 10
-runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=NetworkManager state=restarted\""
+runuser -l $SUDOUSER -c "ansible all -c paramiko -b -o -m service -a \"name=NetworkManager state=restarted\""
 sleep 10
-runuser -l $SUDOUSER -c "ansible all -b -o -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN, ipv4.dns $DNSSERVER\""
-runuser -l $SUDOUSER -c "ansible all -b -o -m service -a \"name=NetworkManager state=restarted\""
+runuser -l $SUDOUSER -c "ansible all -c paramiko -b -o -m command -a \"nmcli con modify eth0 ipv4.dns-search $DOMAIN, ipv4.dns $DNSSERVER\""
+runuser -l $SUDOUSER -c "ansible all -c paramiko -b -o -m service -a \"name=NetworkManager state=restarted\""
 echo $(date) " - NetworkManager configuration complete"
 
 # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled

@@ -1,3 +1,34 @@
+# Important: dedalus specific
+
+This branch of the repository has been modified to address an issue with azure VM
+once created, the VMs needs to be restarted in order for the SSH connection to happen correctly (the ansible deployment then fail)
+Because of this bug, the deployment cannot happen correctly, all the needed cloud resources are created and the VM are prepared for the deployment of openshift, but the playbook fails to run.
+
+To address this issue, this branch of the azure deployment template has been striped of all the openshift ansible deployment stuff (compare `scripts/deployOpenShift.sh` with other branches)
+
+- What this template does automatically? :
+  - Creates all necessary azure resources for the cluster
+  - Prepare host VM (docker and other dependencies)
+  - Create an admin user
+  - Install the provided SSH keys so the master-0 can ssh to all VMs
+  - Save each deployment parameters in environment variables for the created admin user
+- What this template does not do? (need to be done manually):
+  - Create a resource group
+  - Create an openshift application (service principal) in Azure Active Directory and give it Contributor role to the resource group
+  - Create a second openshift application for open id connect authentication (if needed)
+  - Connect via SSH to the first master (`<clustername>-master-0`)
+  - Clone [openshift-ansible](https://github.com/openshift/openshift-ansible) (choose a release branch)
+  - Create an inventory file ex: `inventory-exemple` for this you need to read the [doc](https://docs.okd.io/index.html)
+  - Run ansible installation playbooks inside `openshift-ansible` repository:
+    - `ansible-playbook playbooks/prerequisites.yml`
+    - `ansible-playbook playbooks/deploy_cluster.yml` 
+  - Do [post-install](Post_install.md) stuff
+  
+
+Click here to deploy the cluster on azure and fill all the parameters
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fzipper97412%2Fopenshift-origin%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
+
+
 # OpenShift Origin Deployment Template
 
 ## NOTE: Structural change to Repo
@@ -143,8 +174,8 @@ The appId is used for the aadClientId parameter.
 
 ## Deploy Template
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-origin%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
-<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2Fopenshift-origin%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/AzureGov.png"/></a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fzipper97412%2Fopenshift-origin%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
+<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fzipper97412%2Fopenshift-origin%2Fmaster%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/AzureGov.png"/></a>
 
 Once you have collected all of the prerequisites for the template, you can deploy the template by populating the *azuredeploy.parameters.local.json* file and executing Resource Manager deployment commands with PowerShell or the CLI.
 

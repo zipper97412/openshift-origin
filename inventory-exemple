@@ -1,0 +1,80 @@
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+master0
+new_nodes
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+ansible_ssh_user=clusteradmin
+ansible_become=yes
+#openshift_pkg_version="3.11"
+openshift_release="3.11"
+openshift_deployment_type=origin
+openshift_master_default_subdomain=<wildcard subdomain>
+openshift_master_api_port=443
+openshift_master_console_port=443
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']}, {'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true']}, {'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true']}]
+openshift_disable_check=disk_availability,memory_availability,docker_image_availability
+
+#cloudprovider
+# doc: https://docs.okd.io/latest/install_config/configuring_azure.html
+openshift_storageclass_parameters={'kind': 'managed', 'storageaccounttype': 'Standard_LRS'}
+openshift_cloudprovider_kind=azure
+openshift_cloudprovider_azure_client_id=<openshift application ID>
+openshift_cloudprovider_azure_client_secret=<openshift application secret>
+openshift_cloudprovider_azure_tenant_id=<tenant ID>
+openshift_cloudprovider_azure_subscription_id=<subscription id>
+openshift_cloudprovider_azure_resource_group=OpenShift_Alpha
+openshift_cloudprovider_azure_location=francecentral
+
+# Setup azure blob registry storage
+# a storage account has been created by the template, use it for the internal docker registry
+openshift_hosted_registry_storage_kind=object
+openshift_hosted_registry_storage_azure_blob_accountkey=<registry storage account key>
+openshift_hosted_registry_storage_provider=azure_blob
+openshift_hosted_registry_storage_azure_blob_accountname=<name of the created registry>
+openshift_hosted_registry_storage_azure_blob_container=registry
+openshift_hosted_registry_storage_azure_blob_realm=core.windows.net
+
+osm_controller_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
+osm_api_server_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
+
+
+
+openshift_master_cluster_public_hostname=<master load balancer dns name>
+openshift_master_cluster_public_vip=<master load balancer ip>
+
+# Enable HTPasswdPasswordIdentityProvider
+openshift_master_identity_providers=[{"name": "htpasswd_auth", "login": "true", "challenge": "true", "kind": "HTPasswdPasswordIdentityProvider"}]
+# You can also setup Open Id Connect auth with azure active directory after installation
+# doc: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-post-deployment
+openshift_master_htpasswd_users=< htpasswd user like this: {'clusteradmin' : '$5fsg$dgh3.SGs54GSFDsfg5sgS'}  use hashed password>
+
+
+# host group for masters
+[masters]
+<cluster_prefix>-master-[0:<nb of masters>]
+
+# host group for etcd
+[etcd]
+<cluster_prefix>-master-[0:<nb of masters>]
+
+[master0]
+<cluster_prefix>-master-0
+
+# host group for nodes
+[nodes]
+
+#create one entry for each VM
+
+<cluster_prefix>-master-<number> openshift_node_group_name='node-config-master'
+
+<cluster_prefix>-infra-<number> openshift_node_group_name='node-config-infra'
+
+<cluster_prefix>-node-<number> openshift_node_group_name='node-config-compute'
+
+# host group for new nodes
+[new_nodes]
